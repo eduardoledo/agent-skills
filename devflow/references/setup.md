@@ -39,6 +39,7 @@ Then: `az extension add --name azure-devops` (Azure DevOps only).
 **Logins** open a browser and must be completed by the user (see `agents.md` for how to hand them a terminal):
 
 - `gh auth login` (or `gh auth login -h github.com` to add another account; `gh auth switch` to change the active one). Make sure the active `gh` account is the one that can access the repos in question.
+- **Several GitHub accounts** (e.g. work + personal): answering "Authenticate Git with your GitHub credentials? Y" during a second `gh auth login` can make git's credential manager store that account for all of github.com, so `git fetch` on the other account's private repos fails with "Repository not found". Fix by letting git follow the active gh account: `gh auth setup-git` (writes `credential.https://github.com.helper` to the global git config — ask first). Then `gh auth switch` changes both.
 - `az login` (add `--allow-no-subscriptions` if the account has no Azure subscriptions).
 
 Verify afterwards: `gh auth status`, `az account show --query user.name -o tsv`, `az devops configure --list`.

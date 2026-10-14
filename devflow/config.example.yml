@@ -35,7 +35,7 @@ connectors:           # written by the connector check; pending ones are asked a
 work:                 # used to estimate actual hours (never raw clock time)
   timezone: Europe/London       # default: system timezone
   work_days: [Mon, Tue, Wed, Thu, Fri]
-  work_hours: "09:00-17:30"
+  work_hours: "09:00-17:30"     # or per day: { Mon-Thu: "09:00-17:00", Fri: "09:00-15:00" }
 
 handoff:
   require_approved_pr: false    # true = don't hand off while the PR review is pending
@@ -70,10 +70,14 @@ repos:
       acme:
         path: ../webshop-data-acme
         branch: main
+        default: true           # used when the ticket doesn't identify a client
+        match: "Clients\\Acme"  # substring of the ticket's area path / tags that selects this client
+        value: Acme             # value written by test_env for this client
     test_env:                   # optional: how to point the app at a client's data
-      file: ./appsettings.local.json
-      key: DataFolder
-      value: "{data_repo_path}/live"
+      type: ini-key             # ini-key | json-key
+      file: ./settings.local.ini
+      section: Defaults
+      key: Profile
 
 ci:
   known_failures: []            # tests known to fail on the default branch (inherited)

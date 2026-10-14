@@ -1,0 +1,79 @@
+{
+  "skill_name": "devflow",
+  "evals": [
+    {
+      "id": 1,
+      "name": "tickets-overview",
+      "prompt": "revisar mis tickets --fixtures evals/fixtures/tickets-overview",
+      "expected_output": "Three blocks: assigned open (4101 P1 New, 4105 P2 Triaged), handed over (4090 in Testing with Bob), open PRs (#210 review requested from bob-gh). The failing 'Test Results' check on #210 is labelled inherited (±0 vs base, TestTaxRoundingGBP/CHF). Proposes triage of 4101 as the next action and asks. No writes.",
+      "files": [
+        "evals/fixtures/tickets-overview"
+      ],
+      "assertions": [
+        "Shows three separate blocks: assigned open tickets, handed-over tickets, open PRs",
+        "Lists 4101 (P1, New) and 4105 (P2, Triaged) as assigned open tickets",
+        "Lists 4090 as handed over, in Testing, assigned to Bob",
+        "Labels the failing 'Test Results' check on PR #210 as inherited (unchanged vs base) and names TestTaxRoundingGBP/TestTaxRoundingCHF",
+        "Proposes triaging 4101 as the next action, as a question with options",
+        "Makes no claim of having written to the tracker or GitHub"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "ship-reviewer-is-author",
+      "prompt": "/devflow 4120 --fixtures evals/fixtures/ship-reviewer-is-author",
+      "expected_output": "Deduces phase ship (In Progress, branch with commits, no PR). Plan: run build (succeeded per fixture), commit only src/cart/CartBadge.tsx with a 'FIX: AB#4120 ...' subject, push, PR to main with Summary/Change/Testing body, reviewer default alice-gh flagged because Alice authored the branch commit, ticket comment with the PR link because the Boards-GitHub link doesn't work. No AI mention anywhere. One confirmation for the whole phase; nothing executed.",
+      "files": [
+        "evals/fixtures/ship-reviewer-is-author"
+      ],
+      "assertions": [
+        "Identifies the phase as ship (In Progress, branch with commits, no PR)",
+        "Plans the build/test gate before commit/PR and reports it succeeded per fixture",
+        "Commit subject starts with 'FIX: AB#4120'",
+        "Plans to stage only src/cart/CartBadge.tsx",
+        "No mention of AI assistance (Claude, Co-Authored-By, generated with) in planned commit/PR/comment texts",
+        "Warns that the default reviewer alice-gh authored the branch's commit and suggests an alternative",
+        "Plans a ticket comment with the PR link because the Boards-GitHub link does not work",
+        "Asks a single confirmation for the whole phase and executes nothing",
+        "Commit/PR summary reflects the actual diff (badge sums line quantities)"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "handoff-actual-time",
+      "prompt": "ya está el PR del 4130, pásalo a testing --fixtures evals/fixtures/handoff-actual-time",
+      "expected_output": "Phase handoff. Plan: transition 4130 to Testing with RemainingWork=0 and Custom.ActualTime set (suggested with evidence from In Progress since 2026-10-13T13:00Z / first commit, asked to confirm), assign alice@contoso.com, English handoff comment with branch and PR #215 URL, Teams draft message to Alice. Secret webhook never printed. One confirmation; nothing executed.",
+      "files": [
+        "evals/fixtures/handoff-actual-time"
+      ],
+      "assertions": [
+        "Identifies the phase as handoff for PR #215",
+        "Plans transition of 4130 to Testing with RemainingWork = 0",
+        "Plans Custom.ActualTime with a suggested value backed by evidence (In Progress since 2026-10-13 13:00Z or first commit) and asks to confirm it",
+        "Plans to assign the ticket to alice@contoso.com",
+        "Plans an English ticket comment containing the branch name and the PR #215 URL",
+        "Provides a Teams message draft addressed to Alice for the user to send",
+        "Never prints the secret Teams webhook URL",
+        "Asks a single confirmation for the whole phase and executes nothing",
+        "Does not offer raw clock time since In Progress (~23h) as a candidate for actual hours"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "connectors-pending",
+      "prompt": "revisar mis tickets --fixtures evals/fixtures/connectors-pending",
+      "expected_output": "Connector check first: reports azure-devops pending (az not logged in) and slack pending (webhook mode, empty secret; webhook not implemented). Offers to configure each (configure now / skip / alternative such as switching Slack to draft). Says the tracker problem blocks the ticket blocks while the notifier one doesn't; can still show the PR block from GitHub if the user skips. Doesn't pretend to list tickets. Notes it will ask again next run until fixed.",
+      "files": [
+        "evals/fixtures/connectors-pending"
+      ],
+      "assertions": [
+        "Runs the connector check before the tickets overview and names both pending connectors with their reasons",
+        "Offers to configure each pending connector now, with a skip option",
+        "Offers switching the Slack notifier to draft mode (or notes webhook mode isn't implemented)",
+        "Explains the tracker login blocks the ticket blocks while the notifier issue does not",
+        "Does not invent or list tickets from Azure DevOps",
+        "States the check will be asked again on later runs until the connectors are configured"
+      ]
+    }
+  ]
+}

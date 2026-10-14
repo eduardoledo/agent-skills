@@ -1,0 +1,84 @@
+# devflow configuration — copy to config.yml (or let `/devflow setup` create it).
+# config.yml holds secrets: it is gitignored and must never be shared.
+
+language:
+  user: es            # language devflow talks to you in
+  team: en            # language for ticket comments, PRs and notifications
+
+tracker:
+  type: azure-devops  # azure-devops | jira | github-issues (jira/github-issues: not implemented yet)
+  organization: https://dev.azure.com/contoso
+  project: Contoso
+  ref_format: "AB#{id}"
+  github_link_works: false   # Boards <-> GitHub connection valid? if false, PR links go in comments
+  states:                    # generic -> tracker state names
+    new: New
+    triaged: Triaged
+    in_progress: In Progress
+    testing: Testing
+    later: [Client UAT, Ready for Release, Done, Removed, Rejected, Closed]
+  fields:
+    remaining_hours: Microsoft.VSTS.Scheduling.RemainingWork
+    actual_hours: Custom.ActualTime
+  transition_requirements:
+    testing: [remaining_hours=0, actual_hours]
+
+notifier:
+  type: teams         # teams | slack | none
+  mode: draft         # draft (webhook/graph/connector: not implemented yet)
+
+connectors:           # written by the connector check; pending ones are asked about every run
+  github: { status: ok }
+  azure-devops: { status: ok }
+  teams: { status: ok }
+
+work:                 # used to estimate actual hours (never raw clock time)
+  timezone: Europe/London       # default: system timezone
+  work_days: [Mon, Tue, Wed, Thu, Fri]
+  work_hours: "09:00-17:30"
+
+handoff:
+  require_approved_pr: false    # true = don't hand off while the PR review is pending
+
+commit:
+  format: "{PREFIX}: {ref} {summary}"
+  prefixes: [FIX, ENH, OPT, INT, TEST, DOC, CHORE, BREAK, WIP]
+
+branch:
+  pattern: "{kind}/{id}-{description-kebab}"
+  kinds: { bug: bugfix, default: feature }
+
+defaults:             # empty = ask every time
+  reviewer: alice-gh            # GitHub login
+  tester: alice@contoso.com     # tracker identity
+
+people:               # resolved identities, filled in as devflow learns them
+  alice:
+    github: alice-gh
+    tracker: alice@contoso.com
+    display: Alice Smith
+
+repos:
+  contoso/webshop:
+    build: "npm ci && npm run build"
+    test: "npm test"
+    notes: ""
+    branch_pattern: null        # override of branch.pattern
+    reviewer: null              # override of defaults.reviewer
+    tester: null
+    data_repos:                 # optional: client/environment -> data repo
+      acme:
+        path: ../webshop-data-acme
+        branch: main
+    test_env:                   # optional: how to point the app at a client's data
+      file: ./appsettings.local.json
+      key: DataFolder
+      value: "{data_repo_path}/live"
+
+ci:
+  known_failures: []            # tests known to fail on the default branch (inherited)
+
+secrets:                        # masked whenever shown
+  teams_webhook: ""
+  slack_webhook: ""
+  jira_api_token: ""

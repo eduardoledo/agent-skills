@@ -1,0 +1,4 @@
+{ "id": 4120, "fields": { "System.WorkItemType": "Bug", "System.State": "In Progress", "Microsoft.VSTS.Common.Priority": 2,
+  "System.AssignedTo": { "displayName": "Eduardo Dev", "uniqueName": "eduardo@contoso.com" },
+  "Microsoft.VSTS.Scheduling.RemainingWork": 1.0, "System.Title": "Cart badge shows item lines instead of total quantity",
+  "System.Description": "<div>With 2 lines (3 x shirt, 1 x hat) the badge shows 2; it should show 4.</div>" }, "relations": [] }

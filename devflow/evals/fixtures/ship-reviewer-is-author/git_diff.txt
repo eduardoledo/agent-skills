@@ -1,0 +1,6 @@
+diff --git a/src/cart/CartBadge.tsx b/src/cart/CartBadge.tsx
+@@ -12,7 +12,7 @@ export function CartBadge({ lines }: Props) {
+-  const count = lines.length;
++  const count = lines.reduce((total, line) => total + line.quantity, 0);
+   return <span className="cart-badge" aria-label={`${count} items in cart`}>{count}</span>;
+ }

@@ -1,0 +1,8 @@
+[
+  { "id": 4101, "fields": { "System.WorkItemType": "Bug", "System.State": "New", "Microsoft.VSTS.Common.Priority": 1,
+    "System.IterationPath": "Webshop\Sprint 42", "System.ChangedDate": "2026-10-14T08:10:00Z",
+    "System.ChangedBy": { "displayName": "Bob Jones" }, "System.Title": "Checkout total ignores discount code for EUR baskets", "System.Parent": 4000 } },
+  { "id": 4105, "fields": { "System.WorkItemType": "Task", "System.State": "Triaged", "Microsoft.VSTS.Common.Priority": 2,
+    "Microsoft.VSTS.Scheduling.RemainingWork": 3.0, "System.IterationPath": "Webshop\Sprint 42", "System.ChangedDate": "2026-10-13T16:00:00Z",
+    "System.ChangedBy": { "displayName": "Eduardo Dev" }, "System.Title": "Add 'Save for later' link to cart rows", "System.Parent": 4001 } }
+]

@@ -1,0 +1,15 @@
+# Personal configuration with secrets, and per-user state — never commit
+config.yml
+**/config.yml
+state.yml
+**/state.yml
+
+# Eval runs
+*-workspace/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

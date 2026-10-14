@@ -1,0 +1,4 @@
+* bugfix/4120-cart-badge-count
+  main
+  remotes/origin/bugfix/4120-cart-badge-count
+  remotes/origin/main

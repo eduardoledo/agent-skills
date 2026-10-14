@@ -1,0 +1,5 @@
+{ "value": [
+  { "rev": 1, "revisedDate": "2026-10-10T09:00:00Z", "fields": { "System.State": { "newValue": "New" } } },
+  { "rev": 2, "revisedDate": "2026-10-13T08:30:00Z", "fields": { "System.State": { "oldValue": "New", "newValue": "Triaged" }, "Microsoft.VSTS.Scheduling.RemainingWork": { "newValue": 5.0 } } },
+  { "rev": 3, "revisedDate": "2026-10-13T13:00:00Z", "fields": { "System.State": { "oldValue": "Triaged", "newValue": "In Progress" } } },
+  { "rev": 4, "revisedDate": "2026-10-14T10:40:00Z", "fields": { "Microsoft.VSTS.Scheduling.RemainingWork": { "oldValue": 5.0, "newValue": 2.0 } } } ] }

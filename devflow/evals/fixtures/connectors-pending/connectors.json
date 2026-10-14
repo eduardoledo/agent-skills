@@ -1,0 +1,3 @@
+{ "github": { "ok": true },
+  "azure-devops": { "ok": false, "reason": "az account show: Please run 'az login' to setup account." },
+  "slack": { "ok": false, "reason": "mode 'webhook' selected but secrets.slack_webhook is empty" } }

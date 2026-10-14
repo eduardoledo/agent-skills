@@ -1,0 +1,50 @@
+language:
+  user: es
+  team: en
+tracker:
+  type: azure-devops
+  organization: https://dev.azure.com/contoso
+  project: Webshop
+  ref_format: "AB#{id}"
+  github_link_works: false
+  states:
+    new: New
+    triaged: Triaged
+    in_progress: In Progress
+    testing: Testing
+    later: [Done, Closed, Removed]
+  fields:
+    remaining_hours: Microsoft.VSTS.Scheduling.RemainingWork
+    actual_hours: Custom.ActualTime
+  transition_requirements:
+    testing: [remaining_hours=0, actual_hours]
+notifier:
+  type: slack
+  mode: webhook
+commit:
+  format: "{PREFIX}: {ref} {summary}"
+  prefixes: [FIX, ENH, OPT, INT, TEST, DOC, CHORE, BREAK, WIP]
+branch:
+  pattern: "{kind}/{id}-{description-kebab}"
+  kinds: { bug: bugfix, default: feature }
+defaults:
+  reviewer: alice-gh
+  tester: alice@contoso.com
+people:
+  alice: { github: alice-gh, tracker: alice@contoso.com, display: Alice Smith }
+  bob: { github: bob-gh, tracker: bob@contoso.com, display: Bob Jones }
+repos:
+  contoso/webshop:
+    build: "npm ci && npm run build"
+    test: "npm test"
+ci:
+  known_failures: []
+secrets:
+  slack_webhook: ""
+
+work:
+  timezone: Europe/London
+  work_days: [Mon, Tue, Wed, Thu, Fri]
+  work_hours: "09:00-17:30"
+handoff:
+  require_approved_pr: false

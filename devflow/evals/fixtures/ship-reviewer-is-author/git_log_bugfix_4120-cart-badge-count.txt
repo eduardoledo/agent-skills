@@ -1,0 +1,1 @@
+a1b2c3d|Alice Smith|alice@contoso.com|2026-10-14T09:30:00+01:00|fix: AB#4120 sum quantities for cart badge

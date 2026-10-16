@@ -1,0 +1,3 @@
+{ "github": { "ok": true },
+  "azure-devops": { "ok": true },
+  "teams": { "ok": false, "reason": "teams-graph.ps1 -Action check: Graph GET /me failed: Access token has expired or is not yet valid." } }

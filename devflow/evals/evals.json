@@ -166,6 +166,54 @@
         "Plans to re-check only the affected connector and reports jira as pending (not implemented)",
         "Asks one confirmation and writes nothing"
       ]
+    },
+    {
+      "id": 10,
+      "name": "handoff-graph-dm",
+      "prompt": "ya está el PR del 4130, pásalo a testing --fixtures evals/fixtures/handoff-graph-dm",
+      "expected_output": "Handoff as in handoff-actual-time, but the notification is sent through Microsoft Graph as a DM to Alice: resolves alice@contoso.com to id 6f1c2a9e-… and proposes saving people.alice.teams_id; the plan shows the target (DM to Alice Smith) and the full English Adaptive Card (title 'Ready for testing: AB#4130 — …', facts ticket/branch/PR #215, what to check first, Open ticket / Open PR buttons), sent last, after the tracker writes, with the phase's single confirmation. Nothing sent (fixtures).",
+      "files": [
+        "evals/fixtures/handoff-graph-dm"
+      ],
+      "assertions": [
+        "Plans the notification as a Graph DM to Alice (not a draft to paste), sent last after the tracker writes",
+        "Uses the resolved Entra id for alice@contoso.com and proposes saving it as people.alice.teams_id",
+        "Shows the full Adaptive Card in English with AB#4130, the branch, PR #215 and Open ticket / Open PR buttons",
+        "Covers the card send with the single confirmation of the handoff phase",
+        "Never prints the secret Teams webhook",
+        "Sends nothing and claims no send (fixtures / dry run)"
+      ]
+    },
+    {
+      "id": 11,
+      "name": "handoff-graph-channel",
+      "prompt": "ya está el PR del 4130, pásalo a testing --fixtures evals/fixtures/handoff-graph-channel",
+      "expected_output": "The repo overrides the target to channel: the card is planned as a post in 'Webshop / Testing' with an @mention of Alice Smith using her saved teams_id (no lookup, nothing to save). The plan says the target can be switched to a DM. One confirmation; nothing sent.",
+      "files": [
+        "evals/fixtures/handoff-graph-channel"
+      ],
+      "assertions": [
+        "Plans a channel post to 'Webshop / Testing' because of the repo's notifier_target override",
+        "Plans an @mention of Alice Smith using the saved teams_id, without resolving or proposing to save it again",
+        "Mentions that the target can be switched to a DM",
+        "Covers the post with the single confirmation of the handoff phase and sends nothing"
+      ]
+    },
+    {
+      "id": 12,
+      "name": "graph-token-expired",
+      "prompt": "/devflow setup connectors --fixtures evals/fixtures/graph-token-expired",
+      "expected_output": "Runs the connector check: github and azure-devops ok; teams (mode graph) failing because the Graph token expired. Offers to open a terminal for the user to run the Connect-MgGraph line with all six devflow scopes, then re-check; alternatives: skip (stays pending, asked again next run) or switch to draft. Plans recording connectors.teams as pending with the reason, only with approval. Doesn't claim to have signed in or sent anything.",
+      "files": [
+        "evals/fixtures/graph-token-expired"
+      ],
+      "assertions": [
+        "Reports github and azure-devops as ok and teams as failing because the Graph token expired",
+        "Offers a terminal for the user to run Connect-MgGraph with the scopes Chat.Create, ChatMessage.Send, User.ReadBasic.All, ChannelMessage.Send, Team.ReadBasic.All and Channel.ReadBasic.All",
+        "Offers skipping and switching the notifier to draft as alternatives",
+        "Plans recording teams as pending with the reason only after approval",
+        "Does not claim to have signed in, re-checked successfully or sent anything"
+      ]
     }
   ]
 }

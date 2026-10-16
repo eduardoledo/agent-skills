@@ -25,7 +25,12 @@ tracker:
 
 notifier:
   type: teams         # teams | slack | none
-  mode: draft         # draft (webhook/graph/connector: not implemented yet)
+  mode: draft         # draft | graph (teams only: sends as you via Microsoft Graph) — webhook: not implemented yet
+  graph:              # mode graph only
+    target: dm        # dm | channel
+    team_id: null     # channel target: picked in setup
+    channel_id: null
+    channel_name: null
 
 connectors:           # written by the connector check; pending ones are asked about every run
   github: { status: ok }

@@ -49,7 +49,7 @@ All tracker work goes through the adapter named by `tracker.type`: read `referen
 
 If the adapter file says it is **not implemented**, stop and tell the user which operation is missing; do not improvise against an untested API.
 
-Notifications go through `references/notifiers/<notifier.type>.md` (`teams`, `slack`). Today both only draft the message for the user to send.
+Notifications go through `references/notifiers/<notifier.type>.md` (`teams`, `slack`). Mode `draft` (both) writes the message for the user to send; Teams mode `graph` sends it as the user through Microsoft Graph (DM or channel).
 
 Code hosting is always GitHub via `gh`.
 
@@ -132,8 +132,8 @@ Then propose the next action (as a question).
    2. Working time while `in_progress`: from entering `in_progress` (tracker history) — or the branch's first commit if earlier — to now, counting only working time from `work.work_hours` in `work.timezone` (config; either one range for every day in `work_days`, or a map of day ranges such as `Mon-Thu: "09:00-17:00"`, `Fri: "09:00-15:00"`; defaults Mon–Fri 09:00–17:30 in the system timezone).
    Offer the best candidate as recommended, the other as an alternative, and "another value". Show how each was computed in one line. If there's no evidence at all, ask without a suggestion.
 3. Tester: suggest the default for the repo; if the default tester is one of the branch's authors, warn (someone else should test); if they are also the PR's reviewer, mention it (allowed, but the user may prefer two people); allow others; offer to save.
-4. Plan: comment (template *handoff*: what changed, branch, PR, how to test), `transition → testing` with remaining 0 and actual hours (and any other field the adapter lists as required), `assign` tester, notification draft (notifier) addressed to the tester. Ask once, apply.
-5. Show the notification draft ready to paste and remind the user to send it.
+4. Plan: comment (template *handoff*: what changed, branch, PR, how to test), `transition → testing` with remaining 0 and actual hours (and any other field the adapter lists as required), `assign` tester, notification (notifier) addressed to the tester — in `draft` mode the text, in a sending mode the exact message, its target and any id to save. Ask once, apply; the notification goes last.
+5. `draft`: show the message ready to paste and remind the user to send it. Sending mode: report where it went, or follow the notifier's failure path.
 
 ### status
 

@@ -1,0 +1,3 @@
+{ "id": 4130, "fields": { "System.WorkItemType": "Task", "System.State": "In Progress", "Microsoft.VSTS.Common.Priority": 2,
+  "System.AssignedTo": { "displayName": "Eduardo Dev", "uniqueName": "eduardo@contoso.com" },
+  "Microsoft.VSTS.Scheduling.RemainingWork": 2.0, "Custom.ActualTime": null, "System.Title": "Offer gift wrap option at checkout" }, "relations": [] }

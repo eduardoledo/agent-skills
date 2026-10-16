@@ -18,8 +18,11 @@ Check only what the chosen options need:
 | `gh` | `gh --version`, `gh auth status` | always (PRs, CI) |
 | `az` + extension `azure-devops` | `az version`, `az extension show --name azure-devops` | tracker = azure-devops |
 | `curl` | `curl --version` | tracker = jira (future) |
+| PowerShell (Windows PowerShell 5.1 or `pwsh` 7+) | `$PSVersionTable.PSVersion` | notifier = teams, mode `graph` |
+| Module `Microsoft.Graph.Authentication` | `Get-Module -ListAvailable Microsoft.Graph.Authentication` | notifier = teams, mode `graph` |
+| Graph sign-in with the devflow scopes | `Get-MgContext` lists all scopes in `notifiers/teams.md` § graph | notifier = teams, mode `graph` |
 
-If something is missing, offer to install it with the first available package manager below. Show the exact command and wait for confirmation of each install. If no manager is available, offer the official installer / script.
+If something is missing, offer to install it with the first available package manager below (PowerShell modules: see § Graph PowerShell below). Show the exact command and wait for confirmation of each install. If no manager is available, offer the official installer / script.
 
 | OS | Detect (in order) | GitHub CLI | Azure CLI |
 |---|---|---|---|
@@ -34,6 +37,16 @@ If something is missing, offer to install it with the first available package ma
 Package names drift; if the install fails with "package not found", search the manager (`winget search`, `pacman -Ss`, `yay -Ss`) and propose the match.
 
 Then: `az extension add --name azure-devops` (Azure DevOps only).
+
+**Graph PowerShell** (Teams notifier in mode `graph` only) — install just the authentication module, for the current user (no admin rights):
+
+```powershell
+[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12   # Windows PowerShell 5.1 only
+Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Scope CurrentUser -Force   # only if NuGet is missing (5.1)
+Install-Module Microsoft.Graph.Authentication -Scope CurrentUser -Repository PSGallery
+```
+
+On macOS/Linux install `pwsh` first (`brew install powershell`, or Microsoft's packages for apt/dnf/zypper), then the module. Don't install the full `Microsoft.Graph` meta-module: devflow only needs `Connect-MgGraph` and `Invoke-MgGraphRequest`. The sign-in (`Connect-MgGraph -Scopes …`, scopes in `notifiers/teams.md` § graph) is interactive: hand the user a terminal (`agents.md`). If it ends in "Need admin approval", the tenant requires admin consent: record the connector as `pending` with that reason and offer the IT request text from `notifiers/teams.md` § graph.
 
 **PATH after install:** the agent's session usually keeps the old PATH. Call the new CLI by its full path for the rest of the session and tell the user a restart of the agent picks it up. Typical paths: Windows `C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd`, `C:\Program Files\GitHub CLI\gh.exe`; Linux/macOS `/usr/bin`, `/usr/local/bin`, `/opt/homebrew/bin`. Confirm with `where`/`which` or by checking those paths.
 
@@ -56,6 +69,7 @@ Run at the start of every devflow run (see SKILL.md). One line per selected conn
 | `jira` | adapter not implemented → report as `pending: not implemented` (doesn't block other connectors) | — |
 | `github-issues` | adapter not implemented → `pending: not implemented` | — |
 | `teams` / `slack`, mode `draft` | nothing to check (always OK) | — |
+| `teams`, mode `graph` | `scripts/teams-graph.ps1 -Action check` (module, scopes, `GET /me`) — see `notifiers/teams.md` § graph | user runs `Connect-MgGraph …` in a terminal; admin consent → IT request |
 | `teams` / `slack`, other modes | the mode is implemented (today: no → fall back to draft, report `pending`) · its secret is non-empty | set the secret, or switch mode to `draft` |
 
 Report pending connectors in one short block and offer to fix them now, one question per connector with options *Configure now* / *Skip this time* / *Switch to an alternative* (e.g. notifier mode `draft`). Mark *Configure now* as recommended, except when configuring wouldn't help yet (the selected mode or adapter isn't implemented) — then recommend the working alternative. Show whatever still works (e.g. the PR block when only the tracker is down) after the user answers, not before. Fixing a connector reuses the matching part of § Prerequisites or § Full setup. A skipped connector stays `pending` and is asked about again next run — there is no "don't ask again" except changing the selection itself (e.g. choosing notifier `none`).

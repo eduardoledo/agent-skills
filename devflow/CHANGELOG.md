@@ -4,6 +4,10 @@ All notable changes to devflow. Format: [Keep a Changelog](https://keepachangelo
 
 ## [Unreleased]
 
+### Added
+- Teams notifier mode `graph`: sends the hand-off notification as you through Microsoft Graph, as an Adaptive Card in a DM to the tester or a channel post that @mentions them (`notifier.graph.target`, per-repo `notifier_target`). Uses the Graph PowerShell SDK (`Microsoft.Graph.Authentication` only) and `scripts/teams-graph.ps1`. Needs delegated permissions that many tenants only allow with admin consent; devflow detects it and offers the request text for IT. Falls back to the draft when sending fails. New config keys: `notifier.graph.*`, `repos.<repo>.notifier_target`, `people.<x>.teams_id`.
+- Setup prerequisites and connector check for mode `graph`.
+
 ## [1.3.0] - 2026-10-16
 
 ### Added

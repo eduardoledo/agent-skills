@@ -21,6 +21,7 @@ Recorded (fictional) responses used with `--fixtures <scenario dir>`. In fixture
 | `git_diff.txt` | `git diff` of uncommitted changes |
 | `connectors.json` | result of the connector check (`{name: {ok, reason}}`); missing = all OK |
 | `state.yml` | devflow's state file (`last_tickets_view`, `last_update_check`, `update_available`, …); missing = first run |
+| `graph_resolve_<email>.json` | `scripts/teams-graph.ps1 -Action resolve -Email <email>` (Teams notifier, mode graph); missing = not found |
 | `skill/*` | the skill's own git repo for the update check (`version.txt`, `tags.txt`, `log.txt`, `CHANGELOG.md`, `diff.txt`, `status.txt`, `ahead.txt`; see `references/updates.md` § Fixtures); no `skill/` = no update |
 
 `context.json` may also carry `"agent"` (e.g. `claude-code`) for agent-specific syntax such as suggested commands.

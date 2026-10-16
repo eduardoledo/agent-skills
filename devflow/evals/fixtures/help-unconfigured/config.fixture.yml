@@ -1,0 +1,54 @@
+language:
+  user: es
+  team: en
+tracker:
+  type: azure-devops
+  organization: https://dev.azure.com/contoso
+  project: Webshop
+  ref_format: "AB#{id}"
+  github_link_works: false
+  states:
+    new: New
+    triaged: Triaged
+    in_progress: In Progress
+    testing: Testing
+    later: [Done, Closed, Removed]
+  fields:
+    remaining_hours: Microsoft.VSTS.Scheduling.RemainingWork
+    actual_hours: Custom.ActualTime
+  transition_requirements:
+    testing: [remaining_hours=0, actual_hours]
+notifier:
+  type: teams
+  mode: draft
+connectors:
+  github: { status: ok }
+  azure-devops: { status: pending, reason: "az account show: Please run 'az login' to setup account." }
+  teams: { status: ok }
+commit:
+  format: "{PREFIX}: {ref} {summary}"
+  prefixes: [FIX, ENH, OPT, INT, TEST, DOC, CHORE, BREAK, WIP]
+branch:
+  pattern: "{kind}/{id}-{description-kebab}"
+  kinds: { bug: bugfix, default: feature }
+defaults:
+  reviewer: alice-gh
+  tester: alice@contoso.com
+people:
+  alice: { github: alice-gh, tracker: alice@contoso.com, display: Alice Smith }
+repos:
+  contoso/api:
+    build: "dotnet build"
+    test: "dotnet test"
+updates:
+  check_every: daily
+ci:
+  known_failures: []
+secrets:
+  teams_webhook: "https://contoso.webhook.office.com/webhookb2/FAKE-SECRET-1234"
+work:
+  timezone: Europe/London
+  work_days: [Mon, Tue, Wed, Thu, Fri]
+  work_hours: "09:00-17:30"
+handoff:
+  require_approved_pr: false

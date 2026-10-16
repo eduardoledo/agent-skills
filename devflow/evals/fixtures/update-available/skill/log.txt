@@ -1,0 +1,4 @@
+a1b2c3d DOC: Release devflow 1.3.0
+9f8e7d6 FIX: Don't count weekends in actual hours when work_days is a map
+5c4b3a2 ENH: Hide handed-over tickets block when show_handed_over is false
+3e2d1c0 CHORE: Tidy eval fixtures

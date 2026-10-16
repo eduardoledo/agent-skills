@@ -32,6 +32,10 @@ Other agents: link the skill folder into that agent's skills directory (check it
 
 Each skill that needs configuration ships a `config.example.yml`. The real `config.yml` is created by the skill's setup (e.g. `/devflow setup`), lives next to the skill's `SKILL.md`, may contain secrets and is **gitignored** — never commit it.
 
+## Updates
+
+Keep the clone (don't copy the folder): skills update themselves from it. Releases are tags `<skill>-v<version>` with a `<skill>/CHANGELOG.md` entry; devflow, for example, looks for a new release periodically (`updates.check_every`) and on `/devflow update`, shows what changed and asks before applying.
+
 ## Evals
 
 `<skill>/evals/` holds test prompts and recorded fixtures (fictional data) to check a skill's behaviour in `--dry-run` without touching real services.

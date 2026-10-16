@@ -10,6 +10,7 @@ devflow is written for any agent that reads `SKILL.md` skills. Use the closest m
 | Show a diff / file to the user | Desktop app: show the diff pane / open the file | Agent's file viewer | Print paths as clickable references |
 | Track the PR / CI after creation | Desktop app PR tools (bind PR, read status) | — | `gh pr checks <n>` when the user asks for status |
 | Background work | `run_in_background` on shell tools | Agent's background jobs if any | Run in the foreground |
+| Suggest a devflow command (e.g. `help` pointing to setup) | The slash command in inline code, ready to copy: `/devflow setup`, `/devflow setup repo` | The agent's own syntax to invoke a skill with arguments, if it has one | The phrase to type: "devflow setup" / "devflow setup repo" |
 
 Notes
 

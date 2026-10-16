@@ -3,7 +3,7 @@
 Two modes:
 
 - **Full setup** — `/devflow setup`, or automatically when `config.yml` doesn't exist.
-- **Per-repo mini setup** — automatically the first time devflow runs in a repo that has no entry under `repos:` (key = `owner/name` of the `origin` remote).
+- **Per-repo mini setup** — automatically the first time devflow runs in a repo that has no entry under `repos:` (key = `owner/name` of the `origin` remote). Also on demand with `/devflow setup repo`: if the repo already has an entry, its values are the pre-filled answers and only that entry is written, after showing its diff and getting a yes.
 
 Principles: detect everything that can be detected and show it pre-filled for confirmation; ask only what can't be detected; never assume fixed directories (find repos from the current repo, its sibling folders and the code host); group questions (≤ 4 per round in agents with a question tool). Write `config.yml` only after showing the final file (secrets masked) and getting a yes.
 

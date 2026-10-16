@@ -1,0 +1,13 @@
+diff --git a/devflow/SKILL.md b/devflow/SKILL.md
+@@ ### tickets
+-Show three blocks, compact tables:
++Show three blocks, compact tables (the second one only if `tickets.show_handed_over` isn't `false`):
+@@ ### handoff
+-   2. Working time while `in_progress`: ... counting only working time from `work.work_hours`
++   2. Working time while `in_progress`: ... counting only working time from `work.work_hours`; when `work_hours` is a per-day map, days not in the map are not working days
+diff --git a/devflow/config.example.yml b/devflow/config.example.yml
+@@
++tickets:
++  show_handed_over: true        # false = hide the "Handed over" block in tickets
++
+ handoff:

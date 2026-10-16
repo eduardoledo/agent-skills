@@ -1,6 +1,6 @@
 ---
 name: devflow
-description: Runs the developer's ticket-to-PR admin workflow across an issue tracker (Azure DevOps today; Jira and GitHub Issues prepared), GitHub and Teams/Slack. Lists and triages tickets, finds or creates the ticket branch, ships (build, commit, push, PR, reviewer, CI watch) and hands off to testing (state, hours, tester, notification draft). Use it whenever the user wants to review/check their tickets, work items or tasks, triage a ticket, start or pick up a ticket, prepare/open a PR for a ticket, move a ticket to Testing or hand it to a tester, or asks things like "revisar mis tickets", "empezar el 3535", "preparar PR", "pasar a testing", "what's next on my board" — even if they don't say "devflow". Also use it for "/devflow setup" or when configuring this workflow for a new repo.
+description: Runs the developer's ticket-to-PR admin workflow across an issue tracker (Azure DevOps today; Jira and GitHub Issues prepared), GitHub and Teams/Slack. Lists and triages tickets, finds or creates the ticket branch, ships (build, commit, push, PR, reviewer, CI watch) and hands off to testing (state, hours, tester, notification draft). Use it whenever the user wants to review/check their tickets, work items or tasks, triage a ticket, start or pick up a ticket, prepare/open a PR for a ticket, move a ticket to Testing or hand it to a tester, or asks things like "revisar mis tickets", "empezar el 3535", "preparar PR", "pasar a testing", "what's next on my board" — even if they don't say "devflow". Also use it for "/devflow setup" or "/devflow setup repo" or when configuring this workflow for a new repo; for "/devflow help", "-h", "--help", "ayuda devflow", "qué puede hacer devflow" or "how do I use devflow"; and for "/devflow update" or checking whether devflow itself has a new version.
 ---
 
 # devflow
@@ -26,15 +26,15 @@ Ask through your agent's interactive question tool when it has one, with 2–4 c
 
 `config.yml` sits next to this file (resolve symlinks/junctions: it lives in the real skill folder). Structure: `config.example.yml`.
 
-- If `config.yml` is missing → run **setup** first (`references/setup.md`), then continue with what the user asked.
-- If the current repo (git top-level / origin remote) has no entry under `repos:` → run the **per-repo mini setup** from `references/setup.md`.
+- If `config.yml` is missing → run **setup** first (`references/setup.md`), then continue with what the user asked. Exception: `help` never runs setup (see § help).
+- If the current repo (git top-level / origin remote) has no entry under `repos:` → run the **per-repo mini setup** from `references/setup.md` (also available on demand as `setup repo`). Same exception for `help`.
 - Resolve values as: repo entry → `defaults` → ask. When a default is missing, ask and offer to save it. When the user picks something other than the suggested default, offer "save as new default" (globally or for this repo).
 - `config.yml` contains secrets (webhook URLs, tokens). When showing config, mask every value under `secrets:` and any key ending in `token`, `webhook`, `password` or `key` as `****`. Never copy it into a repo, PR, comment or message.
-- `state.yml` (same folder, also gitignored) holds what devflow remembers between runs: `last_tickets_view` (timestamp of the last `tickets` run, used to highlight what changed since) and `handed_over` (ticket ids the user handed off, as a fallback for `list_handed_over`). Create it on first need; never put secrets in it.
+- `state.yml` (same folder, also gitignored) holds what devflow remembers between runs: `last_tickets_view` (timestamp of the last `tickets` run, used to highlight what changed since) and `handed_over` (ticket ids the user handed off, as a fallback for `list_handed_over`), and the update check (`last_update_check`, `update_available`: see `references/updates.md`). Create it on first need; never put secrets in it.
 
 ## Connector check (every run)
 
-Before doing what the user asked, check that every connector selected in config works — tracker, code host (`gh`), notifier — using the checks in `references/setup.md` § Connector check. It is cheap (a few status commands) and catches expired logins and half-finished setups.
+Before doing what the user asked (every subcommand except `help`, which only reports the stored status), check that every connector selected in config works — tracker, code host (`gh`), notifier — using the checks in `references/setup.md` § Connector check. It is cheap (a few status commands) and catches expired logins and half-finished setups.
 
 - All OK → continue silently.
 - Something missing or failing → tell the user which connector and why (e.g. "`az` not logged in", "Slack webhook mode selected but `secrets.slack_webhook` is empty"), and offer to configure it now (setup § Prerequisites / that connector's section). If they configure it, re-check and continue.
@@ -67,7 +67,12 @@ The adapter maps these to real state names and lists the fields each transition 
 
 ## Deciding what to do
 
-Subcommands: `tickets`, `triage`, `start`, `ship`, `handoff`, `status`, `setup`. With no subcommand:
+Subcommands: `tickets`, `triage`, `start`, `ship`, `handoff`, `status`, `setup`, `setup repo`, `update`, `help`.
+
+- `help`, `-h`, `--help` or a request for help with devflow ("ayuda devflow", "qué puede hacer devflow") → `help` (`help <subcommand>` for one phase).
+- **Unknown subcommand** (e.g. `/devflow shp`) → don't guess and run it: say it doesn't exist, suggest the closest valid one ("¿quisiste decir `ship`?") and show `help`.
+
+With no subcommand:
 
 - **No ticket given** → run `tickets`, then propose the most urgent open ticket (highest priority, then most recently changed) and its next phase.
 - **A ticket given** → `get_ticket` and pick by state:
@@ -134,6 +139,38 @@ Then propose the next action (as a question).
 
 Ticket state/assignee, branch, PR (review, mergeability), CI triage. No writes.
 
+### setup repo
+
+Runs only the per-repo mini setup (`references/setup.md` § 3) for the current repo, without the global questions. If the repo already has an entry under `repos:`, use its values as the pre-filled answers, show the resulting diff of that entry (secrets masked) and write only after a yes.
+
+### update
+
+Checks the skill's own repo for a newer released version now (ignoring `updates.check_every`), shows the summary and offers to apply it. `update --check` only reports. Procedure, summary format, local-changes handling and config migration: `references/updates.md`.
+
+### help
+
+Read-only: it works even when `config.yml` is missing or a connector is down, and never runs the connector check, setup, the update fetch or any write (not even `state.yml`). Local reads only: this file, `config.yml`, `state.yml`, and the current repo's top-level and `origin` remote. Build the text from this file at the moment of asking (don't keep a separate copy), in the user's language.
+
+**`help`** shows, in this order:
+
+1. **Commands** — one line each for every subcommand in § Deciding what to do (plus "no subcommand" and "a ticket id") and the flags `--dry-run` and `--fixtures <dir>`, with 2–3 example invocations.
+2. **Context** — a compact block:
+   - Repo: detected `owner/name`, and whether it has an entry under `repos:`.
+   - Connectors: each selected one with its *stored* status (`connectors.<name>.status` / `reason`); say it is the last recorded status, not a live check.
+   - Defaults: reviewer and tester (repo override → `defaults`), commit format, branch pattern.
+   - Last `tickets`: `state.last_tickets_view` (or "never").
+   - Version: current devflow version and, from `state.update_available`, "update available: X (N commits) → `update`" — cached, no fetch.
+   Mask secrets as everywhere else. If `config.yml` is missing, replace the block with one line saying devflow isn't configured yet.
+3. **Setup needed** (only if something is missing) — a closing warning naming what's missing and the command to run it: `setup` if `config.yml` is missing, `setup repo` if only this repo is unconfigured. Write the command in the agent's syntax (`references/agents.md`, row *Suggest a devflow command*).
+
+End there — no question, nothing pending.
+
+**`help <subcommand>`** — 5–10 lines for that phase: what it reads, what it writes, what it asks to confirm, its preconditions; then the values from config this repo would use in it (e.g. `ship`: build/test command, reviewer, commit format; `start`: branch pattern, data repos, `test_env`; `handoff`: tester, work hours, required fields). Unknown subcommand → as in § Deciding what to do.
+
+## Update check (end of run)
+
+After finishing what the user asked — never before, never in `help` — if `updates.check_every` (`daily` default, `weekly`, `never`) says a check is due since `state.last_update_check`, fetch the skill's repo and look for a newer release (`references/updates.md`). Record the result in `state.yml` (local, no confirmation). If there is one, show the summary at the end of the reply and ask whether to apply it now. A failed fetch, no network or an install that isn't a git clone is skipped silently; `update` explains why.
+
 ## CI triage
 
 For each failing check on a PR: compare with the base branch. If the PR's test report says the failures are unchanged versus base (e.g. "2 ❌ ±0") or the same check/tests fail on the latest base commit, label them **inherited** and name the tests; otherwise label them **new** and show the failing tests/log excerpt. Only new failures block a hand-off recommendation.
@@ -153,6 +190,6 @@ Planned writes:
 Questions for the user: <defaults used / choices needed>
 ```
 
-For read-only phases (`tickets`, `status`) a single line is enough — `Connectors: … · Planned writes: none` — placed after the overview.
+For read-only phases (`tickets`, `status`, `help`, `update --check`) a single line is enough — `Connectors: … · Planned writes: none` — placed after the overview.
 
-`--fixtures <dir>` (used by the evals): do not call `az`, `gh`, builds or git remotes. Read the recorded responses from `<dir>` instead (file names are explained in `evals/fixtures/README.md`), treat `<dir>/config.fixture.yml` as the configuration, `<dir>/context.json` as who/where/when you are, and imply `--dry-run`. A missing fixture file means that call returns nothing.
+`--fixtures <dir>` (used by the evals): do not call `az`, `gh`, builds or git remotes. Read the recorded responses from `<dir>` instead (file names are explained in `evals/fixtures/README.md`), treat `<dir>/config.fixture.yml` as the configuration, `<dir>/context.json` as who/where/when you are, and imply `--dry-run`. A missing fixture file means that call returns nothing. `<dir>/skill/` stands for the skill's own repo in the update check (no `skill/` folder = no update available); the check counts as due unless `<dir>/state.yml` says otherwise.

@@ -13,3 +13,6 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
+
+# Fixture state files are fictional and needed by the evals
+!*/evals/fixtures/**/state.yml

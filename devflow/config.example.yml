@@ -79,6 +79,9 @@ repos:
       section: Defaults
       key: Profile
 
+updates:
+  check_every: daily            # daily | weekly | never — how often devflow looks for a new release of itself
+
 ci:
   known_failures: []            # tests known to fail on the default branch (inherited)
 

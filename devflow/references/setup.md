@@ -1,9 +1,10 @@
 # Setup
 
-Two modes:
+Three modes:
 
-- **Full setup** — `/devflow setup`, or automatically when `config.yml` doesn't exist.
-- **Per-repo mini setup** — automatically the first time devflow runs in a repo that has no entry under `repos:` (key = `owner/name` of the `origin` remote). Also on demand with `/devflow setup repo`: if the repo already has an entry, its values are the pre-filled answers and only that entry is written, after showing its diff and getting a yes.
+- **Full setup** — `/devflow setup` when `config.yml` doesn't exist, or automatically when any command needs it.
+- **Per-repo mini setup** — automatically the first time devflow runs in a repo that has no entry under `repos:` (key = `owner/name` of the `origin` remote). Also on demand with `/devflow setup repo [<owner/name>]` (§ 5).
+- **Reconfigure sections** — `/devflow setup <section> [<section>…]`, or `/devflow setup` with no argument once `config.yml` exists (menu). See § 5.
 
 Principles: detect everything that can be detected and show it pre-filled for confirmation; ask only what can't be detected; never assume fixed directories (find repos from the current repo, its sibling folders and the code host); group questions (≤ 4 per round in agents with a question tool). Write `config.yml` only after showing the final file (secrets masked) and getting a yes.
 
@@ -100,3 +101,44 @@ Show the whole file with secrets masked, ask, then write it next to `SKILL.md` (
 - It is listed in the skill repo's `.gitignore` — check that before writing, and add it if missing.
 - Never print secret values back; mask as `****`.
 - If the skill folder is ever packaged or shared, `config.yml` must be left out.
+
+When reconfiguring sections (§ 5), show only the diff of the touched keys instead of the whole file — including keys that will be removed — with secrets masked.
+
+## 5. Reconfiguring sections
+
+Each section reuses the matching part of § 1–3 and owns these keys (every key in `config.example.yml` belongs to exactly one section):
+
+| Section | Reuses | Keys |
+|---|---|---|
+| `prereqs` | § 1 | none — checks/installs CLIs and logins |
+| `tracker` | § 2.1 | `tracker.*`, tracker secrets (e.g. `secrets.jira_api_token`) |
+| `notifier` | § 2.2 | `notifier.*`, notifier secrets (`secrets.teams_webhook`, `secrets.slack_webhook`) |
+| `conventions` | § 2.3 | `commit.*`, `branch.*`, `ci.known_failures` |
+| `people` | § 2.4 | `defaults.*`, `people.*` |
+| `language` | § 2.5 | `language.*` |
+| `work` | § 2.6 | `work.*`, `handoff.require_approved_pr` |
+| `updates` | — | `updates.check_every` (`daily` / `weekly` / `never`) |
+| `repo` | § 3 | `repos.<owner/name>` |
+| `connectors` | § Connector check | `connectors.*` — runs the check now and offers to fix each pending connector |
+
+**Invocation.**
+
+- `setup <section> [<section>…]` — one or more sections, e.g. `setup people work`.
+- `setup repo [<owner/name>]` — without an argument, the current repo. With one, that entry: detections that need the checkout (build commands, sibling data repos) run if the repo is cloned next to the current one; otherwise ask.
+- `setup` with no argument and `config.yml` present → **menu**: a table of the 10 sections with a one-line summary of their current values (secrets masked), then one multi-select question by group — *Integrations* (prereqs, tracker, notifier, connectors), *Team* (conventions, people), *Personal* (language, work, updates), *Repo* — and, when a group with several sections is picked, a follow-up to pick within it. "Other" accepts section names; "everything" re-runs the full setup pre-filled with the current values.
+- `config.yml` missing → say a full setup is needed and run it, starting with the requested section(s).
+- Unknown section (e.g. `setup pepole`) → suggest the closest ("¿quisiste decir `people`?") and list the valid ones; run nothing.
+
+**Answers.** Every question offers the current value as the recommended option; detections (§ 2–3) are shown next to it when they differ.
+
+**Dependents.** A section includes the keys that depend on its choices:
+
+- `tracker` with a different `type` (or organisation/project) → also re-asks `ref_format`, `states`, `fields`, `transition_requirements`, `github_link_works`; the old tracker's connector entry and secrets are removed.
+- `notifier` with a different `type` → also `mode` and its secret; the old notifier's connector entry and secret are removed.
+- `people` removing someone still used as `defaults.reviewer` / `tester` or a repo override → ask for the replacement.
+
+**Several sections.** Always walk them in the setup order — prereqs → tracker → notifier → conventions → people → language → work → updates → repo → connectors — whatever order they were typed in. Ask the questions of all of them first, then show **one** diff of `config.yml` and ask once (§ 4). Nothing is written if the user stops half-way.
+
+**After writing.** Run the connector check for the connectors affected (a changed tracker or notifier; `connectors` checks all) and record their status; pending ones follow the usual connector-check flow.
+
+In `--fixtures` mode, the planned diff is shown and nothing is written; `connectors.json` stands for the re-check.

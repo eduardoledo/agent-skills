@@ -1,0 +1,3 @@
+{ "github": { "ok": true },
+  "jira": { "ok": false, "reason": "adapter not implemented" },
+  "teams": { "ok": true } }

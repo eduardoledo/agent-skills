@@ -4,6 +4,17 @@ All notable changes to devflow. Format: [Keep a Changelog](https://keepachangelo
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-16
+
+### Added
+- `setup <section> [<section>...]` to reconfigure only part of the setup: `prereqs`, `tracker`, `notifier`, `conventions`, `people`, `language`, `work`, `updates`, `repo`, `connectors`. Current values are offered as the answers, dependent settings come along (a new tracker type re-asks states and fields), several sections give one diff and one confirmation, and affected connectors are re-checked.
+- `setup repo <owner/name>` to edit another repo's entry.
+- `help setup` lists the sections with their current values.
+
+### Changed
+- `setup` with an existing configuration shows a menu of sections instead of starting over.
+- `help` points to `setup connectors` when a connector is pending.
+
 ## [1.2.0] - 2026-10-16
 
 ### Added
@@ -33,7 +44,8 @@ All notable changes to devflow. Format: [Keep a Changelog](https://keepachangelo
 - GitHub PR and CI flow with CI triage, Teams/Slack notification drafts.
 - Setup with prerequisite and connector checks; dry-run evals with fictional fixtures.
 
-[Unreleased]: https://github.com/eduardoledo/agent-skills/compare/devflow-v1.2.0...HEAD
+[Unreleased]: https://github.com/eduardoledo/agent-skills/compare/devflow-v1.3.0...HEAD
+[1.3.0]: https://github.com/eduardoledo/agent-skills/compare/devflow-v1.2.0...devflow-v1.3.0
 [1.2.0]: https://github.com/eduardoledo/agent-skills/compare/devflow-v1.1.0...devflow-v1.2.0
 [1.1.0]: https://github.com/eduardoledo/agent-skills/compare/devflow-v1.0.0...devflow-v1.1.0
 [1.0.0]: https://github.com/eduardoledo/agent-skills/releases/tag/devflow-v1.0.0

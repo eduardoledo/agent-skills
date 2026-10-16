@@ -132,6 +132,40 @@
         "Proposes adding tickets.show_handed_over: true to config.yml as a migration that needs approval",
         "Asks one confirmation to apply and applies nothing (dry run), without writing state.yml"
       ]
+    },
+    {
+      "id": 8,
+      "name": "setup-menu",
+      "prompt": "/devflow setup --fixtures evals/fixtures/setup-menu",
+      "expected_output": "config.yml exists, so no full setup: a table of the 10 sections (prereqs, tracker, notifier, conventions, people, language, work, updates, repo, connectors) with a one-line summary of the current values (azure-devops Contoso/Webshop, teams draft, commit format, reviewer alice-gh / tester alice@contoso.com, es/en, Europe/London 09:00-17:30, updates daily, repo contoso/webshop with npm build and reviewer override bob-gh, connectors ok), the Teams webhook masked. Then one multi-select question by groups (Integrations, Team, Personal, Repo) with a way to type section names or redo everything. Nothing written, no questions of any section asked yet.",
+      "files": [
+        "evals/fixtures/setup-menu"
+      ],
+      "assertions": [
+        "Does not start the full setup from scratch",
+        "Shows a table with all 10 sections and a summary of each one's current values",
+        "Masks the Teams webhook (never prints FAKE-SECRET-1234)",
+        "Asks one multi-select question grouping the sections as Integrations / Team / Personal / Repo",
+        "Offers a way to type section names and to redo everything",
+        "Writes nothing and asks no section-specific questions yet"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "setup-tracker-change",
+      "prompt": "/devflow setup tracker --fixtures evals/fixtures/setup-tracker-change — quiero pasar a Jira: https://contoso.atlassian.net, proyecto WEB",
+      "expected_output": "Reconfigures only the tracker section. Says the Jira adapter is a skeleton (not implemented yet), so tracker operations won't work after the change, and asks whether to continue. Because the type changes it re-asks the dependents (ref_format, states, fields, transition_requirements, github_link_works) and the Jira API token (masked). Shows one diff of config.yml limited to tracker keys, the Jira secret and connectors: removes connectors.azure-devops, adds jira; leaves the other sections untouched. One confirmation; nothing written. After writing it would re-check only the affected connector (jira), which reports pending: not implemented.",
+      "files": [
+        "evals/fixtures/setup-tracker-change"
+      ],
+      "assertions": [
+        "Warns that the Jira adapter is not implemented yet and what that means",
+        "Re-asks or plans the dependent tracker keys (ref_format, states, fields, transition_requirements, github_link_works) instead of keeping the Azure DevOps ones",
+        "Asks for the Jira API token and never prints secret values",
+        "Shows a single diff of config.yml that removes the azure-devops connector entry and touches no other section (people, conventions, work, repos unchanged)",
+        "Plans to re-check only the affected connector and reports jira as pending (not implemented)",
+        "Asks one confirmation and writes nothing"
+      ]
     }
   ]
 }

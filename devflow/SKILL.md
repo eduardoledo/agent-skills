@@ -1,6 +1,6 @@
 ---
 name: devflow
-description: Runs the developer's ticket-to-PR admin workflow across an issue tracker (Azure DevOps today; Jira and GitHub Issues prepared), GitHub and Teams/Slack. Lists and triages tickets, finds or creates the ticket branch, ships (build, commit, push, PR, reviewer, CI watch) and hands off to testing (state, hours, tester, notification draft). Use it whenever the user wants to review/check their tickets, work items or tasks, triage a ticket, start or pick up a ticket, prepare/open a PR for a ticket, move a ticket to Testing or hand it to a tester, or asks things like "revisar mis tickets", "empezar el 3535", "preparar PR", "pasar a testing", "what's next on my board" — even if they don't say "devflow". Also use it for "/devflow setup" or "/devflow setup repo" or when configuring this workflow for a new repo; for "/devflow help", "-h", "--help", "ayuda devflow", "qué puede hacer devflow" or "how do I use devflow"; and for "/devflow update" or checking whether devflow itself has a new version.
+description: Runs the developer's ticket-to-PR admin workflow across an issue tracker (Azure DevOps today; Jira and GitHub Issues prepared), GitHub and Teams/Slack. Lists and triages tickets, finds or creates the ticket branch, ships (build, commit, push, PR, reviewer, CI watch) and hands off to testing (state, hours, tester, notification draft). Use it whenever the user wants to review/check their tickets, work items or tasks, triage a ticket, start or pick up a ticket, prepare/open a PR for a ticket, move a ticket to Testing or hand it to a tester, or asks things like "revisar mis tickets", "empezar el 3535", "preparar PR", "pasar a testing", "what's next on my board" — even if they don't say "devflow". Also use it for "/devflow setup", "/devflow setup repo" or any "/devflow setup <section>" (tracker, notifier, people, work…), when configuring this workflow for a new repo, or when the user wants to change part of its configuration ("cambiar el tester por defecto", "reconfigurar el tracker"); for "/devflow help", "-h", "--help", "ayuda devflow", "qué puede hacer devflow" or "how do I use devflow"; and for "/devflow update" or checking whether devflow itself has a new version.
 ---
 
 # devflow
@@ -27,7 +27,7 @@ Ask through your agent's interactive question tool when it has one, with 2–4 c
 `config.yml` sits next to this file (resolve symlinks/junctions: it lives in the real skill folder). Structure: `config.example.yml`.
 
 - If `config.yml` is missing → run **setup** first (`references/setup.md`), then continue with what the user asked. Exception: `help` never runs setup (see § help).
-- If the current repo (git top-level / origin remote) has no entry under `repos:` → run the **per-repo mini setup** from `references/setup.md` (also available on demand as `setup repo`). Same exception for `help`.
+- If the current repo (git top-level / origin remote) has no entry under `repos:` → run the **per-repo mini setup** from `references/setup.md` (also available on demand as `setup repo`; any other part of the setup can be redone with `setup <section>`). Same exception for `help`.
 - Resolve values as: repo entry → `defaults` → ask. When a default is missing, ask and offer to save it. When the user picks something other than the suggested default, offer "save as new default" (globally or for this repo).
 - `config.yml` contains secrets (webhook URLs, tokens). When showing config, mask every value under `secrets:` and any key ending in `token`, `webhook`, `password` or `key` as `****`. Never copy it into a repo, PR, comment or message.
 - `state.yml` (same folder, also gitignored) holds what devflow remembers between runs: `last_tickets_view` (timestamp of the last `tickets` run, used to highlight what changed since) and `handed_over` (ticket ids the user handed off, as a fallback for `list_handed_over`), and the update check (`last_update_check`, `update_available`: see `references/updates.md`). Create it on first need; never put secrets in it.
@@ -67,7 +67,7 @@ The adapter maps these to real state names and lists the fields each transition 
 
 ## Deciding what to do
 
-Subcommands: `tickets`, `triage`, `start`, `ship`, `handoff`, `status`, `setup`, `setup repo`, `update`, `help`.
+Subcommands: `tickets`, `triage`, `start`, `ship`, `handoff`, `status`, `setup`, `setup <section>` (including `setup repo`), `update`, `help`.
 
 - `help`, `-h`, `--help` or a request for help with devflow ("ayuda devflow", "qué puede hacer devflow") → `help` (`help <subcommand>` for one phase).
 - **Unknown subcommand** (e.g. `/devflow shp`) → don't guess and run it: say it doesn't exist, suggest the closest valid one ("¿quisiste decir `ship`?") and show `help`.
@@ -139,9 +139,13 @@ Then propose the next action (as a question).
 
 Ticket state/assignee, branch, PR (review, mergeability), CI triage. No writes.
 
-### setup repo
+### setup (full, menu or sections)
 
-Runs only the per-repo mini setup (`references/setup.md` § 3) for the current repo, without the global questions. If the repo already has an entry under `repos:`, use its values as the pre-filled answers, show the resulting diff of that entry (secrets masked) and write only after a yes.
+- No `config.yml` → full setup (`references/setup.md` § 1–4).
+- `setup` with `config.yml` present → menu of the 10 sections with their current values, to pick which to reconfigure.
+- `setup <section> [<section>…]` → reconfigure only those sections: `prereqs`, `tracker`, `notifier`, `conventions`, `people`, `language`, `work`, `updates`, `repo [<owner/name>]`, `connectors`.
+
+Current values are the recommended answers, dependent keys come along (a new tracker type re-asks states and fields), several sections are walked in the setup order with one diff of `config.yml` and one confirmation, and the affected connectors are re-checked after writing. Key ownership, menu, dependents and edge cases: `references/setup.md` § 5.
 
 ### update
 
@@ -161,11 +165,11 @@ Read-only: it works even when `config.yml` is missing or a connector is down, an
    - Last `tickets`: `state.last_tickets_view` (or "never").
    - Version: current devflow version and, from `state.update_available`, "update available: X (N commits) → `update`" — cached, no fetch.
    Mask secrets as everywhere else. If `config.yml` is missing, replace the block with one line saying devflow isn't configured yet.
-3. **Setup needed** (only if something is missing) — a closing warning naming what's missing and the command to run it: `setup` if `config.yml` is missing, `setup repo` if only this repo is unconfigured. Write the command in the agent's syntax (`references/agents.md`, row *Suggest a devflow command*).
+3. **Setup needed** (only if something is missing) — a closing warning naming what's missing and the most specific command to fix it: `setup` if `config.yml` is missing; otherwise `setup repo` if this repo is unconfigured and `setup connectors` if a connector is pending (both if both). Write the command in the agent's syntax (`references/agents.md`, row *Suggest a devflow command*).
 
 End there — no question, nothing pending.
 
-**`help <subcommand>`** — 5–10 lines for that phase: what it reads, what it writes, what it asks to confirm, its preconditions; then the values from config this repo would use in it (e.g. `ship`: build/test command, reviewer, commit format; `start`: branch pattern, data repos, `test_env`; `handoff`: tester, work hours, required fields). Unknown subcommand → as in § Deciding what to do.
+**`help <subcommand>`** — 5–10 lines for that phase: what it reads, what it writes, what it asks to confirm, its preconditions; then the values from config this repo would use in it (e.g. `ship`: build/test command, reviewer, commit format; `start`: branch pattern, data repos, `test_env`; `handoff`: tester, work hours, required fields). `help setup` lists the 10 sections with a one-line summary of their current values (secrets masked) and how to invoke them. Unknown subcommand → as in § Deciding what to do.
 
 ## Update check (end of run)
 
